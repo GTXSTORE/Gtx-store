@@ -145,30 +145,50 @@ function escapeHTML(s){
 
 // إنشاء حساب
 async function signup(){
+
+async function signup(){
  const full_name=document.getElementById("fullname").value.trim();
  const phone=document.getElementById("phone").value.trim();
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
 
- if(!full_name||!phone||!email||password.length<6){
-  msg("أدخل جميع المعلومات، وكلمة مرور من 6 أحرف على الأقل.");
+ if(!full_name || !phone || !email || password.length<6){
+  msg("أدخل جميع المعلومات وكلمة مرور من 6 أحرف على الأقل.");
   return;
  }
 
- const {data,error}=await db.auth.signUp({
-  email,password,
-  options:{data:{full_name,phone}}
- });
+ try {
+  msg("جارٍ إنشاء الحساب...");
 
- if(error){msg(error.message);return;}
+  const {data,error}=await db.auth.signUp({
+   email,
+   password,
+   options:{
+    data:{full_name,phone}
+   }
+  });
 
- if(data.session){
-  currentUser=data.user;
-  await loadAccount();
- }else{
-  msg("تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد التسجيل، ثم سجل الدخول.");
+  if(error){
+   msg("خطأ التسجيل: "+error.message+
+       (error.code ? " | Code: "+error.code : ""));
+   return;
+  }
+
+  if(data.session){
+   currentUser=data.user;
+   await loadAccount();
+  }else{
+   msg("تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد التسجيل.");
+  }
+
+ } catch(error){
+  msg("خطأ اتصال Supabase: "+
+      (error.message || String(error)));
  }
 }
+
+
+
 
 // تسجيل الدخول
 async function login(){

@@ -3,300 +3,436 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GTX STORE - المتجر الرقمي</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTX STORE</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#09090e;color:white;
- font-family:Tahoma,Arial,sans-serif;
- direction:rtl
-}
-header{
- background:#111116;padding:18px 5%;
- display:flex;justify-content:space-between;
- align-items:center;flex-wrap:wrap;gap:15px;
- border-bottom:1px solid #333
-}
-.logo{font-size:29px;font-weight:bold}
+body{margin:0;background:#09090e;color:white;font-family:Tahoma,Arial}
+header{background:#15151d;padding:20px;text-align:center;border-bottom:1px solid #333}
+.logo{font-size:30px;font-weight:bold}
 .logo span{color:#ed1025}
-nav{display:flex;gap:18px;flex-wrap:wrap}
-a{color:white;text-decoration:none}
-.hero{
- padding:65px 7%;
- background:linear-gradient(110deg,#09090e,#30050c,#09090e);
- display:flex;align-items:center;justify-content:space-between;
- flex-wrap:wrap;gap:20px
-}
-.hero h1{font-size:55px;margin:0}
-.hero h1 span{color:#ed1025}
-.hero p{font-size:20px;color:#ddd}
-.hero .art{font-size:90px}
-button{
- border:0;border-radius:9px;padding:13px 20px;
- cursor:pointer;font-weight:bold
-}
-.red{background:#e50920;color:white}
-section{padding:35px 5%}
-h2{font-size:27px}
-h2 span{color:#ed1025}
-.search{
- width:100%;padding:15px;border-radius:10px;
- background:#17171f;border:1px solid #444;
- color:white;font-size:16px;margin:15px 0
-}
-.categories{display:flex;gap:10px;flex-wrap:wrap}
-.categories button{background:#25252d;color:white}
-.categories button.active{background:#e50920}
-.products{
- display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
- gap:18px;margin-top:25px
-}
-.card{
- background:#17171f;border:1px solid #34343e;
- border-radius:15px;overflow:hidden
-}
-.icon{
- height:130px;background:linear-gradient(140deg,#360811,#15151c);
- display:flex;align-items:center;justify-content:center;
- font-size:65px
-}
-.content{padding:17px}
-.content p{color:#aaa}
-.price{font-size:22px;color:#ff3549;font-weight:bold;margin:15px 0}
-.content button{width:100%;background:#e50920;color:white}
-.info{
- background:#15151d;text-align:center;
- border-top:1px solid #333;border-bottom:1px solid #333
-}
-.info p{color:#bbb;line-height:2}
-footer{text-align:center;padding:25px;color:#888}
-.cart{
- position:fixed;bottom:20px;left:20px;
- background:#e50920;color:white;border-radius:40px;
- z-index:5;box-shadow:0 3px 15px #000
-}
-#panel{
- display:none;position:fixed;inset:0;background:#000c;
- z-index:10;justify-content:center;align-items:center;padding:15px
-}
-.box{
- background:#191920;border:1px solid #444;
- border-radius:15px;padding:22px;width:100%;max-width:450px;
- max-height:85vh;overflow:auto
-}
-.item{
- display:flex;justify-content:space-between;
- gap:10px;padding:12px 0;border-bottom:1px solid #444
-}
-.item button{background:#a00;color:white;padding:5px}
-.box input{
- width:100%;padding:13px;margin:7px 0;
- background:#09090e;border:1px solid #444;
- border-radius:8px;color:white
-}
-.total{font-size:22px;color:#ff3549;margin:20px 0}
-.whatsapp{background:#159c53;color:white;width:100%}
-.close{background:#333;color:white;width:100%;margin-top:10px}
-@media(max-width:600px){
- .hero h1{font-size:40px}
- header{justify-content:center}
- nav{justify-content:center}
-}
+main{max-width:850px;margin:auto;padding:18px}
+section,.card{background:#17171f;border:1px solid #383842;border-radius:14px;padding:18px;margin:15px 0}
+h2{color:#ff3549}
+input,select{width:100%;padding:13px;margin:7px 0;background:#09090e;color:white;border:1px solid #444;border-radius:8px;font-size:15px}
+button{padding:12px 17px;border:0;border-radius:9px;background:#e50920;color:white;font-weight:bold;cursor:pointer;margin:5px}
+button:disabled{opacity:.5}
+.secondary{background:#333}
+.green{background:#159c53}
+.hidden{display:none!important}
+.balance{font-size:30px;color:#ff3549;font-weight:bold}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.product{background:#22222b;border:1px solid #444;border-radius:12px;padding:15px}
+.product h3{margin-top:5px}
+.price{color:#ff3549;font-size:20px;font-weight:bold}
+small{color:#aaa}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #444;padding:12px 0}
+#message{padding:12px;border-radius:8px;background:#24242c;margin:10px 0;display:none}
+footer{text-align:center;color:#888;padding:25px}
 </style>
 </head>
 <body>
 
 <header>
  <div class="logo">👑 GTX <span>STORE</span></div>
- <nav>
-  <a href="#">الرئيسية</a>
-  <a href="#services">خدماتنا</a>
-  <a href="#about">من نحن</a>
-  <a href="#contact">اتصل بنا</a>
- </nav>
+ <p>الهاتف • الخدمات الرقمية • الألعاب</p>
 </header>
 
-<div class="hero">
- <div>
-  <h1>GTX <span>STORE</span></h1>
-  <h3>الهاتف • الخدمات الرقمية • الألعاب</h3>
-  <p>جميع خدماتك الرقمية في مكان واحد وبأفضل الأسعار!</p>
-  <p>✔ سرعة في الخدمة<br>
-  ✔ دعم ومساعدة<br>
-  ✔ أسعار مناسبة</p>
-  <button class="red" onclick="document.getElementById('services').scrollIntoView()">
-  🛒 تسوق الآن
-  </button>
- </div>
- <div class="art">🎮 🔥</div>
+<main>
+<div id="message"></div>
+
+<!-- تسجيل الدخول -->
+<section id="auth">
+ <h2>👤 حساب الزبون</h2>
+ <input id="fullname" placeholder="الاسم الكامل">
+ <input id="phone" placeholder="رقم الهاتف">
+ <input id="email" type="email" placeholder="البريد الإلكتروني">
+ <input id="password" type="password" placeholder="كلمة المرور">
+ <button onclick="signup()">إنشاء حساب جديد</button>
+ <button class="secondary" onclick="login()">تسجيل الدخول</button>
+</section>
+
+<!-- الحساب -->
+<div id="account" class="hidden">
+ <section>
+  <div class="row">
+   <div>
+    <small>مرحباً بك</small>
+    <h2 id="welcome">GTX STORE</h2>
+   </div>
+   <button class="secondary" onclick="logout()">خروج</button>
+  </div>
+  <p>💰 رصيد محفظتك</p>
+  <div class="balance"><span id="balance">0</span> دج</div>
+ </section>
+
+ <section>
+  <h2>💳 شحن المحفظة</h2>
+  <p>اختر طريقة الدفع وأرسل طلب الشحن.</p>
+  <select id="method">
+   <option value="BaridiMob">BaridiMob</option>
+   <option value="CCP">CCP</option>
+  </select>
+  <input id="amount" type="number" min="1" placeholder="المبلغ بالدينار">
+  <input id="reference" placeholder="رقم العملية أو مرجع الدفع">
+  <button class="green" onclick="requestTopup()">إرسال طلب الشحن</button>
+  <small>سيتم إضافة الرصيد بعد مراجعة الإدارة والموافقة على الطلب.</small>
+ </section>
+
+ <section>
+  <h2>🛍️ منتجاتنا وخدماتنا</h2>
+  <div id="products" class="grid">جار تحميل المنتجات...</div>
+ </section>
+
+ <section>
+  <h2>📋 طلبات شحن المحفظة</h2>
+  <div id="myTopups"></div>
+ </section>
+
+ <section>
+  <h2>📦 طلباتي</h2>
+  <div id="myOrders"></div>
+ </section>
+
+ <!-- لوحة المدير -->
+ <section id="admin" class="hidden">
+  <h2>👑 لوحة تحكم المدير</h2>
+
+  <h3>إضافة منتج</h3>
+  <input id="pname" placeholder="اسم المنتج">
+  <input id="pcat" placeholder="التصنيف">
+  <input id="pprice" type="number" min="1" placeholder="السعر بالدينار">
+  <button onclick="addProduct()">إضافة المنتج</button>
+
+  <h3>طلبات شحن الزبائن</h3>
+  <div id="requests"></div>
+ </section>
 </div>
+</main>
 
-<section id="services">
- <h2>🛍️ <span>خدماتنا</span></h2>
-
- <input class="search" id="search"
- placeholder="🔍 ابحث عن خدمة..."
- oninput="render()">
-
- <div class="categories">
-  <button class="active" onclick="filter('الكل',this)">الكل</button>
-  <button onclick="filter('ألعاب',this)">الألعاب</button>
-  <button onclick="filter('اشتراكات',this)">الاشتراكات</button>
-  <button onclick="filter('رقمي',this)">الخدمات الرقمية</button>
- </div>
-
- <div class="products" id="products"></div>
-</section>
-
-<section class="info" id="about">
- <h2>لماذا تختار <span>GTX STORE</span>؟</h2>
- <p>
- متجر متخصص في الخدمات الرقمية والألعاب.<br>
- نهدف إلى تقديم تجربة شراء سهلة وسريعة وآمنة.
- </p>
-</section>
-
-<section id="contact" style="text-align:center">
- <h2>هل تحتاج إلى <span>مساعدة؟</span></h2>
- <p>فريق GTX STORE في خدمتك.</p>
- <button class="red" onclick="contact()">تواصل معنا عبر واتساب</button>
-</section>
-
-<footer>
- © 2026 GTX STORE - جميع الحقوق محفوظة
-</footer>
-
-<button class="cart" onclick="openCart()">
- 🛒 السلة (<span id="count">0</span>)
-</button>
-
-<div id="panel">
- <div class="box">
-  <h2>🛒 سلة المشتريات</h2>
-  <div id="items"></div>
-  <div class="total" id="total">المجموع: 0 دج</div>
-  <input id="customer" placeholder="اسمك الكامل">
-  <input id="phone" placeholder="رقم هاتفك">
-  <button class="whatsapp" onclick="checkout()">
-  تأكيد الطلب عبر واتساب
-  </button>
-  <button class="close" onclick="closeCart()">إغلاق</button>
- </div>
-</div>
+<footer>© 2026 GTX STORE - جميع الحقوق محفوظة 👑</footer>
 
 <script>
-// ضع رقم واتساب الخاص بك مع رمز الجزائر
-// مثال: 213XXXXXXXXX
-const WHATSAPP_NUMBER = "213XXXXXXXXX";
+const SUPABASE_URL = "https://qcfuwjfbgxsesdialoft.supabase.co";
+const SUPABASE_KEY = "sb_publishable_pg02L9gYm5CybiZQIRHgoQ_lieDjIcI";
 
-// هذه أسعار تجريبية يمكنك تغييرها
-const products = [
- {name:"110 جوهرة فري فاير",price:250,cat:"ألعاب",icon:"💎"},
- {name:"210 جوهرة فري فاير",price:490,cat:"ألعاب",icon:"🔥"},
- {name:"530 جوهرة فري فاير",price:1100,cat:"ألعاب",icon:"💎"},
- {name:"شحن eFootball",price:500,cat:"ألعاب",icon:"⚽"},
- {name:"1050 عملة eFootball",price:1800,cat:"ألعاب",icon:"🎮"},
- {name:"اشتراك Snapchat+",price:1200,cat:"اشتراكات",icon:"👻"},
- {name:"اشتراك Netflix",price:1500,cat:"اشتراكات",icon:"🎬"},
- {name:"Spotify Premium",price:1000,cat:"اشتراكات",icon:"🎵"},
- {name:"خدمات رقمية",price:500,cat:"رقمي",icon:"📱"}
-];
+const db = window.supabase.createClient(
+ SUPABASE_URL,
+ SUPABASE_KEY
+);
 
-let cart=[];
-let category="الكل";
+let currentUser = null;
+let profile = null;
 
-function render(){
- let q=document.getElementById("search").value.toLowerCase();
- let list=products.filter(p=>
- (category==="الكل"||p.cat===category)&&
- p.name.toLowerCase().includes(q)
+function msg(text){
+ const box=document.getElementById("message");
+ box.textContent=text;
+ box.style.display="block";
+ window.scrollTo(0,0);
+}
+
+function money(n){
+ return Number(n).toLocaleString("en-US");
+}
+
+function escapeHTML(s){
+ return String(s ?? "").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",
+ '"':"&quot;","'":"&#39;"
+ })[c]);
+}
+
+// إنشاء حساب
+async function signup(){
+ const full_name=document.getElementById("fullname").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+
+ if(!full_name||!phone||!email||password.length<6){
+  msg("أدخل جميع المعلومات، وكلمة مرور من 6 أحرف على الأقل.");
+  return;
+ }
+
+ const {data,error}=await db.auth.signUp({
+  email,password,
+  options:{data:{full_name,phone}}
+ });
+
+ if(error){msg(error.message);return;}
+
+ if(data.session){
+  currentUser=data.user;
+  await loadAccount();
+ }else{
+  msg("تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد التسجيل، ثم سجل الدخول.");
+ }
+}
+
+// تسجيل الدخول
+async function login(){
+ const email=document.getElementById("email").value.trim();
+ const password=document.getElementById("password").value;
+
+ if(!email||!password){msg("أدخل البريد الإلكتروني وكلمة المرور.");return;}
+
+ const {data,error}=await db.auth.signInWithPassword({
+  email,password
+ });
+
+ if(error){msg(error.message);return;}
+
+ currentUser=data.user;
+ await loadAccount();
+}
+
+// تسجيل الخروج
+async function logout(){
+ await db.auth.signOut();
+ currentUser=null;
+ profile=null;
+ document.getElementById("account").classList.add("hidden");
+ document.getElementById("auth").classList.remove("hidden");
+ msg("تم تسجيل الخروج.");
+}
+
+// تحميل الحساب
+async function loadAccount(){
+ const {data,error}=await db.from("profiles")
+  .select("*").eq("id",currentUser.id).single();
+
+ if(error){msg("تعذر تحميل الحساب: "+error.message);return;}
+
+ profile=data;
+
+ document.getElementById("auth").classList.add("hidden");
+ document.getElementById("account").classList.remove("hidden");
+ document.getElementById("welcome").textContent=
+  profile.full_name||"زبون GTX";
+
+ document.getElementById("admin").classList.toggle(
+  "hidden",profile.role!=="admin"
  );
- document.getElementById("products").innerHTML=list.map(p=>{
- let i=products.indexOf(p);
- return `<div class="card">
- <div class="icon">${p.icon}</div>
- <div class="content">
- <h3>${p.name}</h3>
- <p>خدمة رقمية من GTX STORE</p>
- <div class="price">${p.price.toLocaleString("ar-DZ")} دج</div>
- <button onclick="add(${i})">أضف إلى السلة 🛒</button>
- </div></div>`;
- }).join("");
+
+ await refreshWallet();
+ await loadProducts();
+ await loadTopups();
+ await loadOrders();
+
+ if(profile.role==="admin") await loadRequests();
 }
 
-function filter(cat,btn){
- category=cat;
- document.querySelectorAll(".categories button")
- .forEach(b=>b.classList.remove("active"));
- btn.classList.add("active");
- render();
+// تحديث الرصيد
+async function refreshWallet(){
+ const {data,error}=await db.from("wallets")
+  .select("balance").eq("user_id",currentUser.id).single();
+
+ if(error){msg("تعذر تحميل المحفظة.");return;}
+
+ document.getElementById("balance").textContent=money(data.balance);
 }
 
-function add(i){
- cart.push(products[i]);
- update();
- alert("تمت إضافة المنتج إلى السلة!");
-}
+// طلب شحن
+async function requestTopup(){
+ const amount=Number(document.getElementById("amount").value);
+ const payment_method=document.getElementById("method").value;
+ const reference=document.getElementById("reference").value.trim();
 
-function removeItem(i){
- cart.splice(i,1);
- update();
-}
-
-function update(){
- document.getElementById("count").textContent=cart.length;
- let total=cart.reduce((s,p)=>s+p.price,0);
- document.getElementById("total").textContent=
- "المجموع: "+total.toLocaleString("ar-DZ")+" دج";
- document.getElementById("items").innerHTML=cart.length?
- cart.map((p,i)=>`
- <div class="item">
- <span>${p.icon} ${p.name}<br>${p.price} دج</span>
- <button onclick="removeItem(${i})">حذف</button>
- </div>`).join(""):"السلة فارغة";
-}
-
-function openCart(){
- update();
- document.getElementById("panel").style.display="flex";
-}
-
-function closeCart(){
- document.getElementById("panel").style.display="none";
-}
-
-function checkout(){
- if(!cart.length){alert("السلة فارغة!");return;}
- if(WHATSAPP_NUMBER==="213XXXXXXXXX"){
- alert("يجب إضافة رقم واتساب الخاص بك في الكود.");
- return;
+ if(!Number.isInteger(amount)||amount<=0){
+  msg("أدخل مبلغاً صحيحاً.");
+  return;
  }
- let name=document.getElementById("customer").value.trim();
- let phone=document.getElementById("phone").value.trim();
- if(!name||!phone){
- alert("يرجى إدخال اسمك ورقم هاتفك.");
- return;
- }
- let msg="السلام عليكم GTX STORE، أريد طلب المنتجات التالية:\n\n";
- cart.forEach(p=>msg+=`- ${p.name}: ${p.price} دج\n`);
- let total=cart.reduce((s,p)=>s+p.price,0);
- msg+=`\nالمجموع: ${total} دج\nالاسم: ${name}\nالهاتف: ${phone}`;
- window.open("https://wa.me/"+WHATSAPP_NUMBER+
- "?text="+encodeURIComponent(msg),"_blank");
+
+ const {error}=await db.from("topup_requests").insert({
+  user_id:currentUser.id,
+  amount,
+  payment_method,
+  reference,
+  status:"pending"
+ });
+
+ if(error){msg("تعذر إرسال الطلب: "+error.message);return;}
+
+ document.getElementById("amount").value="";
+ document.getElementById("reference").value="";
+ msg("تم إرسال طلب الشحن بنجاح. انتظر موافقة الإدارة.");
+ await loadTopups();
 }
 
-function contact(){
- if(WHATSAPP_NUMBER==="213781357241"){
- alert("أضف رقم واتساب الخاص بك في الكود.");
- return;
+// المنتجات
+async function loadProducts(){
+ const {data,error}=await db.from("products")
+  .select("*").eq("active",true).order("created_at");
+
+ if(error){
+  document.getElementById("products").textContent="تعذر تحميل المنتجات.";
+  return;
  }
- window.open("https://wa.me/"+WHATSAPP_NUMBER,"_blank");
+
+ const box=document.getElementById("products");
+
+ if(!data.length){
+  box.textContent="لا توجد منتجات حالياً. ستتم إضافة المنتجات من لوحة الإدارة.";
+  return;
+ }
+
+ box.innerHTML=data.map(p=>`
+  <div class="product">
+   <h3>${escapeHTML(p.name)}</h3>
+   <small>${escapeHTML(p.category||"خدمة رقمية")}</small>
+   <p class="price">${money(p.price)} دج</p>
+   <button onclick="buy('${p.id}')">شراء الآن 🛒</button>
+  </div>
+ `).join("");
 }
 
-render();
-update();
+// شراء منتج
+async function buy(id){
+ if(!confirm("هل تريد شراء هذا المنتج من رصيدك؟"))return;
+
+ const {error}=await db.rpc("purchase_service",{
+  p_product_id:id,
+  p_quantity:1
+ });
+
+ if(error){
+  msg("لم تتم عملية الشراء: "+error.message);
+  return;
+ }
+
+ msg("تم الشراء بنجاح! 👑");
+ await refreshWallet();
+ await loadOrders();
+}
+
+// سجل طلبات الشحن
+async function loadTopups(){
+ const {data,error}=await db.from("topup_requests")
+  .select("*").eq("user_id",currentUser.id)
+  .order("created_at",{ascending:false});
+
+ if(error)return;
+
+ document.getElementById("myTopups").innerHTML=data.length?
+ data.map(r=>`
+  <div class="row">
+   <span>${money(r.amount)} دج - ${escapeHTML(r.payment_method)}</span>
+   <b>${escapeHTML(r.status)}</b>
+  </div>
+ `).join(""):"لا توجد طلبات شحن.";
+}
+
+// سجل المشتريات
+async function loadOrders(){
+ const {data,error}=await db.from("orders")
+  .select("*").eq("user_id",currentUser.id)
+  .order("created_at",{ascending:false});
+
+ if(error)return;
+
+ document.getElementById("myOrders").innerHTML=data.length?
+ data.map(o=>`
+  <div class="row">
+   <span>${escapeHTML(o.product_name)} × ${o.quantity}</span>
+   <span>${money(o.total_amount)} دج</span>
+   <b>${escapeHTML(o.status)}</b>
+  </div>
+ `).join(""):"لا توجد مشتريات.";
+}
+
+// إضافة منتج من المدير
+async function addProduct(){
+ if(profile?.role!=="admin")return;
+
+ const name=document.getElementById("pname").value.trim();
+ const category=document.getElementById("pcat").value.trim();
+ const price=Number(document.getElementById("pprice").value);
+
+ if(!name||!Number.isInteger(price)||price<=0){
+  msg("أدخل اسم المنتج وسعراً صحيحاً.");
+  return;
+ }
+
+ const {error}=await db.from("products").insert({
+  name,category,price,active:true
+ });
+
+ if(error){msg(error.message);return;}
+
+ document.getElementById("pname").value="";
+ document.getElementById("pcat").value="";
+ document.getElementById("pprice").value="";
+
+ msg("تمت إضافة المنتج.");
+ await loadProducts();
+}
+
+// طلبات الشحن للمدير
+async function loadRequests(){
+ if(profile?.role!=="admin")return;
+
+ const {data,error}=await db.from("topup_requests")
+  .select("*").eq("status","pending")
+  .order("created_at",{ascending:true});
+
+ if(error){
+  document.getElementById("requests").textContent=error.message;
+  return;
+ }
+
+ document.getElementById("requests").innerHTML=data.length?
+ data.map(r=>`
+  <div class="card">
+   <p>رقم الزبون: ${escapeHTML(r.user_id)}</p>
+   <p>المبلغ: ${money(r.amount)} دج</p>
+   <p>طريقة الدفع: ${escapeHTML(r.payment_method)}</p>
+   <p>مرجع الدفع: ${escapeHTML(r.reference||"غير محدد")}</p>
+   <button class="green" onclick="approve('${r.id}')">قبول الشحن</button>
+   <button class="secondary" onclick="reject('${r.id}')">رفض الطلب</button>
+  </div>
+ `).join(""):"لا توجد طلبات شحن جديدة.";
+}
+
+// قبول الشحن
+async function approve(id){
+ if(!confirm("هل تحققت من وصول المبلغ وتريد إضافة الرصيد؟"))return;
+
+ const {error}=await db.rpc("approve_topup",{
+  p_request_id:id
+ });
+
+ if(error){msg("تعذر قبول الطلب: "+error.message);return;}
+
+ msg("تم قبول الشحن وإضافة الرصيد.");
+ await loadRequests();
+}
+
+// رفض الشحن
+async function reject(id){
+ if(!confirm("هل تريد رفض طلب الشحن؟"))return;
+
+ const {error}=await db.from("topup_requests")
+  .update({status:"rejected"})
+  .eq("id",id).eq("status","pending");
+
+ if(error){msg(error.message);return;}
+
+ msg("تم رفض الطلب.");
+ await loadRequests();
+}
+
+// استعادة الجلسة عند فتح الموقع
+async function start(){
+ const {data}=await db.auth.getSession();
+
+ if(data.session){
+  currentUser=data.session.user;
+  await loadAccount();
+ }
+}
+
+start();
 </script>
 </body>
 </html>
-

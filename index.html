@@ -1,1 +1,302 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTX STORE - المتجر الرقمي</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#09090e;color:white;
+ font-family:Tahoma,Arial,sans-serif;
+ direction:rtl
+}
+header{
+ background:#111116;padding:18px 5%;
+ display:flex;justify-content:space-between;
+ align-items:center;flex-wrap:wrap;gap:15px;
+ border-bottom:1px solid #333
+}
+.logo{font-size:29px;font-weight:bold}
+.logo span{color:#ed1025}
+nav{display:flex;gap:18px;flex-wrap:wrap}
+a{color:white;text-decoration:none}
+.hero{
+ padding:65px 7%;
+ background:linear-gradient(110deg,#09090e,#30050c,#09090e);
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:20px
+}
+.hero h1{font-size:55px;margin:0}
+.hero h1 span{color:#ed1025}
+.hero p{font-size:20px;color:#ddd}
+.hero .art{font-size:90px}
+button{
+ border:0;border-radius:9px;padding:13px 20px;
+ cursor:pointer;font-weight:bold
+}
+.red{background:#e50920;color:white}
+section{padding:35px 5%}
+h2{font-size:27px}
+h2 span{color:#ed1025}
+.search{
+ width:100%;padding:15px;border-radius:10px;
+ background:#17171f;border:1px solid #444;
+ color:white;font-size:16px;margin:15px 0
+}
+.categories{display:flex;gap:10px;flex-wrap:wrap}
+.categories button{background:#25252d;color:white}
+.categories button.active{background:#e50920}
+.products{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+ gap:18px;margin-top:25px
+}
+.card{
+ background:#17171f;border:1px solid #34343e;
+ border-radius:15px;overflow:hidden
+}
+.icon{
+ height:130px;background:linear-gradient(140deg,#360811,#15151c);
+ display:flex;align-items:center;justify-content:center;
+ font-size:65px
+}
+.content{padding:17px}
+.content p{color:#aaa}
+.price{font-size:22px;color:#ff3549;font-weight:bold;margin:15px 0}
+.content button{width:100%;background:#e50920;color:white}
+.info{
+ background:#15151d;text-align:center;
+ border-top:1px solid #333;border-bottom:1px solid #333
+}
+.info p{color:#bbb;line-height:2}
+footer{text-align:center;padding:25px;color:#888}
+.cart{
+ position:fixed;bottom:20px;left:20px;
+ background:#e50920;color:white;border-radius:40px;
+ z-index:5;box-shadow:0 3px 15px #000
+}
+#panel{
+ display:none;position:fixed;inset:0;background:#000c;
+ z-index:10;justify-content:center;align-items:center;padding:15px
+}
+.box{
+ background:#191920;border:1px solid #444;
+ border-radius:15px;padding:22px;width:100%;max-width:450px;
+ max-height:85vh;overflow:auto
+}
+.item{
+ display:flex;justify-content:space-between;
+ gap:10px;padding:12px 0;border-bottom:1px solid #444
+}
+.item button{background:#a00;color:white;padding:5px}
+.box input{
+ width:100%;padding:13px;margin:7px 0;
+ background:#09090e;border:1px solid #444;
+ border-radius:8px;color:white
+}
+.total{font-size:22px;color:#ff3549;margin:20px 0}
+.whatsapp{background:#159c53;color:white;width:100%}
+.close{background:#333;color:white;width:100%;margin-top:10px}
+@media(max-width:600px){
+ .hero h1{font-size:40px}
+ header{justify-content:center}
+ nav{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">👑 GTX <span>STORE</span></div>
+ <nav>
+  <a href="#">الرئيسية</a>
+  <a href="#services">خدماتنا</a>
+  <a href="#about">من نحن</a>
+  <a href="#contact">اتصل بنا</a>
+ </nav>
+</header>
+
+<div class="hero">
+ <div>
+  <h1>GTX <span>STORE</span></h1>
+  <h3>الهاتف • الخدمات الرقمية • الألعاب</h3>
+  <p>جميع خدماتك الرقمية في مكان واحد وبأفضل الأسعار!</p>
+  <p>✔ سرعة في الخدمة<br>
+  ✔ دعم ومساعدة<br>
+  ✔ أسعار مناسبة</p>
+  <button class="red" onclick="document.getElementById('services').scrollIntoView()">
+  🛒 تسوق الآن
+  </button>
+ </div>
+ <div class="art">🎮 🔥</div>
+</div>
+
+<section id="services">
+ <h2>🛍️ <span>خدماتنا</span></h2>
+
+ <input class="search" id="search"
+ placeholder="🔍 ابحث عن خدمة..."
+ oninput="render()">
+
+ <div class="categories">
+  <button class="active" onclick="filter('الكل',this)">الكل</button>
+  <button onclick="filter('ألعاب',this)">الألعاب</button>
+  <button onclick="filter('اشتراكات',this)">الاشتراكات</button>
+  <button onclick="filter('رقمي',this)">الخدمات الرقمية</button>
+ </div>
+
+ <div class="products" id="products"></div>
+</section>
+
+<section class="info" id="about">
+ <h2>لماذا تختار <span>GTX STORE</span>؟</h2>
+ <p>
+ متجر متخصص في الخدمات الرقمية والألعاب.<br>
+ نهدف إلى تقديم تجربة شراء سهلة وسريعة وآمنة.
+ </p>
+</section>
+
+<section id="contact" style="text-align:center">
+ <h2>هل تحتاج إلى <span>مساعدة؟</span></h2>
+ <p>فريق GTX STORE في خدمتك.</p>
+ <button class="red" onclick="contact()">تواصل معنا عبر واتساب</button>
+</section>
+
+<footer>
+ © 2026 GTX STORE - جميع الحقوق محفوظة
+</footer>
+
+<button class="cart" onclick="openCart()">
+ 🛒 السلة (<span id="count">0</span>)
+</button>
+
+<div id="panel">
+ <div class="box">
+  <h2>🛒 سلة المشتريات</h2>
+  <div id="items"></div>
+  <div class="total" id="total">المجموع: 0 دج</div>
+  <input id="customer" placeholder="اسمك الكامل">
+  <input id="phone" placeholder="رقم هاتفك">
+  <button class="whatsapp" onclick="checkout()">
+  تأكيد الطلب عبر واتساب
+  </button>
+  <button class="close" onclick="closeCart()">إغلاق</button>
+ </div>
+</div>
+
+<script>
+// ضع رقم واتساب الخاص بك مع رمز الجزائر
+// مثال: 213XXXXXXXXX
+const WHATSAPP_NUMBER = "213XXXXXXXXX";
+
+// هذه أسعار تجريبية يمكنك تغييرها
+const products = [
+ {name:"110 جوهرة فري فاير",price:250,cat:"ألعاب",icon:"💎"},
+ {name:"210 جوهرة فري فاير",price:490,cat:"ألعاب",icon:"🔥"},
+ {name:"530 جوهرة فري فاير",price:1100,cat:"ألعاب",icon:"💎"},
+ {name:"شحن eFootball",price:500,cat:"ألعاب",icon:"⚽"},
+ {name:"1050 عملة eFootball",price:1800,cat:"ألعاب",icon:"🎮"},
+ {name:"اشتراك Snapchat+",price:1200,cat:"اشتراكات",icon:"👻"},
+ {name:"اشتراك Netflix",price:1500,cat:"اشتراكات",icon:"🎬"},
+ {name:"Spotify Premium",price:1000,cat:"اشتراكات",icon:"🎵"},
+ {name:"خدمات رقمية",price:500,cat:"رقمي",icon:"📱"}
+];
+
+let cart=[];
+let category="الكل";
+
+function render(){
+ let q=document.getElementById("search").value.toLowerCase();
+ let list=products.filter(p=>
+ (category==="الكل"||p.cat===category)&&
+ p.name.toLowerCase().includes(q)
+ );
+ document.getElementById("products").innerHTML=list.map(p=>{
+ let i=products.indexOf(p);
+ return `<div class="card">
+ <div class="icon">${p.icon}</div>
+ <div class="content">
+ <h3>${p.name}</h3>
+ <p>خدمة رقمية من GTX STORE</p>
+ <div class="price">${p.price.toLocaleString("ar-DZ")} دج</div>
+ <button onclick="add(${i})">أضف إلى السلة 🛒</button>
+ </div></div>`;
+ }).join("");
+}
+
+function filter(cat,btn){
+ category=cat;
+ document.querySelectorAll(".categories button")
+ .forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+ render();
+}
+
+function add(i){
+ cart.push(products[i]);
+ update();
+ alert("تمت إضافة المنتج إلى السلة!");
+}
+
+function removeItem(i){
+ cart.splice(i,1);
+ update();
+}
+
+function update(){
+ document.getElementById("count").textContent=cart.length;
+ let total=cart.reduce((s,p)=>s+p.price,0);
+ document.getElementById("total").textContent=
+ "المجموع: "+total.toLocaleString("ar-DZ")+" دج";
+ document.getElementById("items").innerHTML=cart.length?
+ cart.map((p,i)=>`
+ <div class="item">
+ <span>${p.icon} ${p.name}<br>${p.price} دج</span>
+ <button onclick="removeItem(${i})">حذف</button>
+ </div>`).join(""):"السلة فارغة";
+}
+
+function openCart(){
+ update();
+ document.getElementById("panel").style.display="flex";
+}
+
+function closeCart(){
+ document.getElementById("panel").style.display="none";
+}
+
+function checkout(){
+ if(!cart.length){alert("السلة فارغة!");return;}
+ if(WHATSAPP_NUMBER==="213XXXXXXXXX"){
+ alert("يجب إضافة رقم واتساب الخاص بك في الكود.");
+ return;
+ }
+ let name=document.getElementById("customer").value.trim();
+ let phone=document.getElementById("phone").value.trim();
+ if(!name||!phone){
+ alert("يرجى إدخال اسمك ورقم هاتفك.");
+ return;
+ }
+ let msg="السلام عليكم GTX STORE، أريد طلب المنتجات التالية:\n\n";
+ cart.forEach(p=>msg+=`- ${p.name}: ${p.price} دج\n`);
+ let total=cart.reduce((s,p)=>s+p.price,0);
+ msg+=`\nالمجموع: ${total} دج\nالاسم: ${name}\nالهاتف: ${phone}`;
+ window.open("https://wa.me/"+WHATSAPP_NUMBER+
+ "?text="+encodeURIComponent(msg),"_blank");
+}
+
+function contact(){
+ if(WHATSAPP_NUMBER==="213781357241"){
+ alert("أضف رقم واتساب الخاص بك في الكود.");
+ return;
+ }
+ window.open("https://wa.me/"+WHATSAPP_NUMBER,"_blank");
+}
+
+render();
+update();
+</script>
+</body>
+</html>
+

@@ -1,458 +1,49 @@
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GTX STORE</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#09090e;color:white;font-family:Tahoma,Arial}
-header{background:#15151d;padding:20px;text-align:center;border-bottom:1px solid #333}
-.logo{font-size:30px;font-weight:bold}
-.logo span{color:#ed1025}
-main{max-width:850px;margin:auto;padding:18px}
-section,.card{background:#17171f;border:1px solid #383842;border-radius:14px;padding:18px;margin:15px 0}
-h2{color:#ff3549}
-input,select{width:100%;padding:13px;margin:7px 0;background:#09090e;color:white;border:1px solid #444;border-radius:8px;font-size:15px}
-button{padding:12px 17px;border:0;border-radius:9px;background:#e50920;color:white;font-weight:bold;cursor:pointer;margin:5px}
-button:disabled{opacity:.5}
-.secondary{background:#333}
-.green{background:#159c53}
-.hidden{display:none!important}
-.balance{font-size:30px;color:#ff3549;font-weight:bold}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
-.product{background:#22222b;border:1px solid #444;border-radius:12px;padding:15px}
-.product h3{margin-top:5px}
-.price{color:#ff3549;font-size:20px;font-weight:bold}
-small{color:#aaa}
-.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #444;padding:12px 0}
-#message{padding:12px;border-radius:8px;background:#24242c;margin:10px 0;display:none}
-footer{text-align:center;color:#888;padding:25px}
-</style>
-</head>
-<body>
-
-<header>
- <div class="logo">👑 GTX <span>STORE</span></div>
- <p>الهاتف • الخدمات الرقمية • الألعاب</p>
-</header>
-
-<main>
-<div id="message"></div>
-
-<!-- تسجيل الدخول -->
-<section id="auth">
- <h2>👤 حساب الزبون</h2>
- <input id="fullname" placeholder="الاسم الكامل">
- <input id="phone" placeholder="رقم الهاتف">
- <input id="email" type="email" placeholder="البريد الإلكتروني">
- <input id="password" type="password" placeholder="كلمة المرور">
- <button onclick="signup()">إنشاء حساب جديد</button>
- <button class="secondary" onclick="login()">تسجيل الدخول</button>
-</section>
-
-<!-- الحساب -->
-<div id="account" class="hidden">
- <section>
-  <div class="row">
-   <div>
-    <small>مرحباً بك</small>
-    <h2 id="welcome">GTX STORE</h2>
-   </div>
-   <button class="secondary" onclick="logout()">خروج</button>
-  </div>
-  <p>💰 رصيد محفظتك</p>
-  <div class="balance"><span id="balance">0</span> دج</div>
- </section>
-
- <section>
-  <h2>💳 شحن المحفظة</h2>
-  <p>اختر طريقة الدفع وأرسل طلب الشحن.</p>
-  <select id="method">
-   <option value="BaridiMob">BaridiMob</option>
-   <option value="CCP">CCP</option>
-  </select>
-  <input id="amount" type="number" min="1" placeholder="المبلغ بالدينار">
-  <input id="reference" placeholder="رقم العملية أو مرجع الدفع">
-  <button class="green" onclick="requestTopup()">إرسال طلب الشحن</button>
-  <small>سيتم إضافة الرصيد بعد مراجعة الإدارة والموافقة على الطلب.</small>
- </section>
-
- <section>
-  <h2>🛍️ منتجاتنا وخدماتنا</h2>
-  <div id="products" class="grid">جار تحميل المنتجات...</div>
- </section>
-
- <section>
-  <h2>📋 طلبات شحن المحفظة</h2>
-  <div id="myTopups"></div>
- </section>
-
- <section>
-  <h2>📦 طلباتي</h2>
-  <div id="myOrders"></div>
- </section>
-
- <!-- لوحة المدير -->
- <section id="admin" class="hidden">
-  <h2>👑 لوحة تحكم المدير</h2>
-
-  <h3>إضافة منتج</h3>
-  <input id="pname" placeholder="اسم المنتج">
-  <input id="pcat" placeholder="التصنيف">
-  <input id="pprice" type="number" min="1" placeholder="السعر بالدينار">
-  <button onclick="addProduct()">إضافة المنتج</button>
-
-  <h3>طلبات شحن الزبائن</h3>
-  <div id="requests"></div>
- </section>
-</div>
-</main>
-
-<footer>© 2026 GTX STORE - جميع الحقوق محفوظة 👑</footer>
-
-<script>
-const SUPABASE_URL = "https://qcfuwjfbgxsesdialoft.supabase.co";
-const SUPABASE_KEY = "sb_publishable_pg02L9gYm5CybiZQIRHgoQ_lieDjIcI";
-
-const db = window.supabase.createClient(
- SUPABASE_URL,
- SUPABASE_KEY
-);
-
-let currentUser = null;
-let profile = null;
-
-function msg(text){
- const box=document.getElementById("message");
- box.textContent=text;
- box.style.display="block";
- window.scrollTo(0,0);
-}
-
-function money(n){
- return Number(n).toLocaleString("en-US");
-}
-
-function escapeHTML(s){
- return String(s ?? "").replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",
- '"':"&quot;","'":"&#39;"
- })[c]);
-}
-
-// إنشاء حساب
 async function signup(){
+ const full_name = document.getElementById("fullname").value.trim();
+ const phone = document.getElementById("phone").value.trim();
+ const email = document.getElementById("email").value.trim();
+ const password = document.getElementById("password").value;
 
-async function signup(){
- const full_name=document.getElementById("fullname").value.trim();
- const phone=document.getElementById("phone").value.trim();
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
-
- if(!full_name || !phone || !email || password.length<6){
-  msg("أدخل جميع المعلومات وكلمة مرور من 6 أحرف على الأقل.");
-  return;
+ if(!full_name || !phone || !email || password.length < 6){
+   msg("أدخل جميع المعلومات وكلمة المرور من 6 أحرف على الأقل.");
+   return;
  }
+
+ const btn = document.querySelector('#auth button');
 
  try {
-  msg("جارٍ إنشاء الحساب...");
+   btn.disabled = true;
+   msg("جارٍ إنشاء الحساب...");
 
-  const {data,error}=await db.auth.signUp({
-   email,
-   password,
-   options:{
-    data:{full_name,phone}
+   if(!window.supabase){
+     throw new Error("تعذر تحميل مكتبة Supabase.");
    }
-  });
 
-  if(error){
-   msg("خطأ التسجيل: "+error.message+
-       (error.code ? " | Code: "+error.code : ""));
-   return;
-  }
+   const {data,error} = await db.auth.signUp({
+     email: email,
+     password: password,
+     options: {
+       data: {
+         full_name: full_name,
+         phone: phone
+       }
+     }
+   });
 
-  if(data.session){
-   currentUser=data.user;
-   await loadAccount();
-  }else{
-   msg("تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيد التسجيل.");
-  }
+   if(error) throw error;
 
- } catch(error){
-  msg("خطأ اتصال Supabase: "+
-      (error.message || String(error)));
+   if(data.session && data.user){
+     currentUser = data.user;
+     await loadAccount();
+   } else {
+     msg("تم إنشاء الحساب بنجاح. تحقق من بريدك الإلكتروني لتأكيد الحساب، ثم سجل الدخول.");
+   }
+
+ } catch(error) {
+   msg("خطأ: " + (error.message || "تعذر الاتصال بالخادم."));
+   console.error("Signup error:",error);
+ } finally {
+   btn.disabled = false;
  }
 }
-
-
-
-
-// تسجيل الدخول
-async function login(){
- const email=document.getElementById("email").value.trim();
- const password=document.getElementById("password").value;
-
- if(!email||!password){msg("أدخل البريد الإلكتروني وكلمة المرور.");return;}
-
- const {data,error}=await db.auth.signInWithPassword({
-  email,password
- });
-
- if(error){msg(error.message);return;}
-
- currentUser=data.user;
- await loadAccount();
-}
-
-// تسجيل الخروج
-async function logout(){
- await db.auth.signOut();
- currentUser=null;
- profile=null;
- document.getElementById("account").classList.add("hidden");
- document.getElementById("auth").classList.remove("hidden");
- msg("تم تسجيل الخروج.");
-}
-
-// تحميل الحساب
-async function loadAccount(){
- const {data,error}=await db.from("profiles")
-  .select("*").eq("id",currentUser.id).single();
-
- if(error){msg("تعذر تحميل الحساب: "+error.message);return;}
-
- profile=data;
-
- document.getElementById("auth").classList.add("hidden");
- document.getElementById("account").classList.remove("hidden");
- document.getElementById("welcome").textContent=
-  profile.full_name||"زبون GTX";
-
- document.getElementById("admin").classList.toggle(
-  "hidden",profile.role!=="admin"
- );
-
- await refreshWallet();
- await loadProducts();
- await loadTopups();
- await loadOrders();
-
- if(profile.role==="admin") await loadRequests();
-}
-
-// تحديث الرصيد
-async function refreshWallet(){
- const {data,error}=await db.from("wallets")
-  .select("balance").eq("user_id",currentUser.id).single();
-
- if(error){msg("تعذر تحميل المحفظة.");return;}
-
- document.getElementById("balance").textContent=money(data.balance);
-}
-
-// طلب شحن
-async function requestTopup(){
- const amount=Number(document.getElementById("amount").value);
- const payment_method=document.getElementById("method").value;
- const reference=document.getElementById("reference").value.trim();
-
- if(!Number.isInteger(amount)||amount<=0){
-  msg("أدخل مبلغاً صحيحاً.");
-  return;
- }
-
- const {error}=await db.from("topup_requests").insert({
-  user_id:currentUser.id,
-  amount,
-  payment_method,
-  reference,
-  status:"pending"
- });
-
- if(error){msg("تعذر إرسال الطلب: "+error.message);return;}
-
- document.getElementById("amount").value="";
- document.getElementById("reference").value="";
- msg("تم إرسال طلب الشحن بنجاح. انتظر موافقة الإدارة.");
- await loadTopups();
-}
-
-// المنتجات
-async function loadProducts(){
- const {data,error}=await db.from("products")
-  .select("*").eq("active",true).order("created_at");
-
- if(error){
-  document.getElementById("products").textContent="تعذر تحميل المنتجات.";
-  return;
- }
-
- const box=document.getElementById("products");
-
- if(!data.length){
-  box.textContent="لا توجد منتجات حالياً. ستتم إضافة المنتجات من لوحة الإدارة.";
-  return;
- }
-
- box.innerHTML=data.map(p=>`
-  <div class="product">
-   <h3>${escapeHTML(p.name)}</h3>
-   <small>${escapeHTML(p.category||"خدمة رقمية")}</small>
-   <p class="price">${money(p.price)} دج</p>
-   <button onclick="buy('${p.id}')">شراء الآن 🛒</button>
-  </div>
- `).join("");
-}
-
-// شراء منتج
-async function buy(id){
- if(!confirm("هل تريد شراء هذا المنتج من رصيدك؟"))return;
-
- const {error}=await db.rpc("purchase_service",{
-  p_product_id:id,
-  p_quantity:1
- });
-
- if(error){
-  msg("لم تتم عملية الشراء: "+error.message);
-  return;
- }
-
- msg("تم الشراء بنجاح! 👑");
- await refreshWallet();
- await loadOrders();
-}
-
-// سجل طلبات الشحن
-async function loadTopups(){
- const {data,error}=await db.from("topup_requests")
-  .select("*").eq("user_id",currentUser.id)
-  .order("created_at",{ascending:false});
-
- if(error)return;
-
- document.getElementById("myTopups").innerHTML=data.length?
- data.map(r=>`
-  <div class="row">
-   <span>${money(r.amount)} دج - ${escapeHTML(r.payment_method)}</span>
-   <b>${escapeHTML(r.status)}</b>
-  </div>
- `).join(""):"لا توجد طلبات شحن.";
-}
-
-// سجل المشتريات
-async function loadOrders(){
- const {data,error}=await db.from("orders")
-  .select("*").eq("user_id",currentUser.id)
-  .order("created_at",{ascending:false});
-
- if(error)return;
-
- document.getElementById("myOrders").innerHTML=data.length?
- data.map(o=>`
-  <div class="row">
-   <span>${escapeHTML(o.product_name)} × ${o.quantity}</span>
-   <span>${money(o.total_amount)} دج</span>
-   <b>${escapeHTML(o.status)}</b>
-  </div>
- `).join(""):"لا توجد مشتريات.";
-}
-
-// إضافة منتج من المدير
-async function addProduct(){
- if(profile?.role!=="admin")return;
-
- const name=document.getElementById("pname").value.trim();
- const category=document.getElementById("pcat").value.trim();
- const price=Number(document.getElementById("pprice").value);
-
- if(!name||!Number.isInteger(price)||price<=0){
-  msg("أدخل اسم المنتج وسعراً صحيحاً.");
-  return;
- }
-
- const {error}=await db.from("products").insert({
-  name,category,price,active:true
- });
-
- if(error){msg(error.message);return;}
-
- document.getElementById("pname").value="";
- document.getElementById("pcat").value="";
- document.getElementById("pprice").value="";
-
- msg("تمت إضافة المنتج.");
- await loadProducts();
-}
-
-// طلبات الشحن للمدير
-async function loadRequests(){
- if(profile?.role!=="admin")return;
-
- const {data,error}=await db.from("topup_requests")
-  .select("*").eq("status","pending")
-  .order("created_at",{ascending:true});
-
- if(error){
-  document.getElementById("requests").textContent=error.message;
-  return;
- }
-
- document.getElementById("requests").innerHTML=data.length?
- data.map(r=>`
-  <div class="card">
-   <p>رقم الزبون: ${escapeHTML(r.user_id)}</p>
-   <p>المبلغ: ${money(r.amount)} دج</p>
-   <p>طريقة الدفع: ${escapeHTML(r.payment_method)}</p>
-   <p>مرجع الدفع: ${escapeHTML(r.reference||"غير محدد")}</p>
-   <button class="green" onclick="approve('${r.id}')">قبول الشحن</button>
-   <button class="secondary" onclick="reject('${r.id}')">رفض الطلب</button>
-  </div>
- `).join(""):"لا توجد طلبات شحن جديدة.";
-}
-
-// قبول الشحن
-async function approve(id){
- if(!confirm("هل تحققت من وصول المبلغ وتريد إضافة الرصيد؟"))return;
-
- const {error}=await db.rpc("approve_topup",{
-  p_request_id:id
- });
-
- if(error){msg("تعذر قبول الطلب: "+error.message);return;}
-
- msg("تم قبول الشحن وإضافة الرصيد.");
- await loadRequests();
-}
-
-// رفض الشحن
-async function reject(id){
- if(!confirm("هل تريد رفض طلب الشحن؟"))return;
-
- const {error}=await db.from("topup_requests")
-  .update({status:"rejected"})
-  .eq("id",id).eq("status","pending");
-
- if(error){msg(error.message);return;}
-
- msg("تم رفض الطلب.");
- await loadRequests();
-}
-
-// استعادة الجلسة عند فتح الموقع
-async function start(){
- const {data}=await db.auth.getSession();
-
- if(data.session){
-  currentUser=data.session.user;
-  await loadAccount();
- }
-}
-
-start();
-</script>
-</body>
-</html>
